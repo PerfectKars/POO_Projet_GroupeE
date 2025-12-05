@@ -16,7 +16,7 @@ void Jeu::lancer() {
         RenduConsole::afficher(*grille);
         std::cout << "---------------------------\n";
 
-        Grille ancienne = *grille;  // Sauvegarder l'état de la grille
+        Grille ancienne = *grille;  
 
         grille->appliquerRegles(*regle);
 
