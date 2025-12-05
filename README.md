@@ -45,17 +45,18 @@ make clean
 4. Structure du Projet
 
 Voici la structure des dossiers et fichiers du projet :
-     - src/ : Contient le code source du projet, incluant la logique du jeu, les règles, et les affichages.
 
-     - include/ : Contient les fichiers d'en-tête qui définissent les interfaces et les structures de données.
+   - src/ : Contient le code source du projet, incluant la logique du jeu, les règles, et les affichages.
 
-     - build/ : Ce dossier est généré automatiquement lors de la compilation et contient les fichiers de build.
+   - include/ : Contient les fichiers d'en-tête qui définissent les interfaces et les structures de données.
 
-     - .vscode/ : Répertoire contenant la configuration de VSCode pour l'éditeur, incluant les tâches de compilation, le débogage et les paramètres de l'environnement de développement.
+   - build/ : Ce dossier est généré automatiquement lors de la compilation et contient les fichiers de build.
 
-     - CMakeLists.txt : Fichier de configuration pour CMake, utilisé pour générer les fichiers de build.
+   - .vscode/ : Répertoire contenant la configuration de VSCode pour l'éditeur, incluant les tâches de compilation, le débogage et les paramètres de l'environnement de développement.
 
-     - Makefile : Pour simplifier la compilation (utilisé en parallèle avec CMake).
+   - CMakeLists.txt : Fichier de configuration pour CMake, utilisé pour générer les fichiers de build.
+
+   - Makefile : Pour simplifier la compilation (utilisé en parallèle avec CMake).
 
 5. Prérequis
 Installation de SFML
