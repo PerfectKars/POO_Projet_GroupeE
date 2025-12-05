@@ -1,5 +1,4 @@
-#ifndef MORTE_H
-#define MORTE_H
+#pragma once
 
 #include "EtatCellule.h"
 
@@ -8,5 +7,3 @@ public:
     bool estVivante() const override { return false; }
     EtatCellule* clone() const override { return new Morte(*this); }
 };
-
-#endif
