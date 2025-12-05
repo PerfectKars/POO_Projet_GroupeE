@@ -1,0 +1,455 @@
+
+// Projet : Jeu de la Vie 
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <memory>
+#include <string>
+#include <stdexcept>
+#include <filesystem>
+
+#include <SFML/Graphics.hpp>
+
+// 
+// 1. Représentation de l'état des cellules 
+// 
+
+
+
+class CellState {
+public:
+    virtual ~CellState() = default;
+    virtual bool isAlive() const = 0;
+    virtual std::unique_ptr<CellState> clone() const = 0;
+};
+
+class AliveState : public CellState {
+public:
+    bool isAlive() const override { return true; }
+    std::unique_ptr<CellState> clone() const override {
+        return std::make_unique<AliveState>(*this);
+    }
+};
+
+class DeadState : public CellState {
+public:
+    bool isAlive() const override { return false; }
+    std::unique_ptr<CellState> clone() const override {
+        return std::make_unique<DeadState>(*this);
+    }
+};
+
+
+// 2. Classe Cell : encapsule un état polymorphe
+
+
+class Cell {
+private:
+    std::unique_ptr<CellState> state;
+
+public:
+    explicit Cell(std::unique_ptr<CellState> s)
+        : state(std::move(s)) {}
+
+    // Constructeur de copie
+    Cell(const Cell& other)
+        : state(other.state ? other.state->clone() : nullptr) {}
+
+    // Opérateur d'affectation
+    Cell& operator=(const Cell& other) {
+        if (this != &other) {
+            state = other.state ? other.state->clone() : nullptr;
+        }
+        return *this;
+    }
+
+    // Constructeur par défaut : cellule morte
+    Cell() : state(std::make_unique<DeadState>()) {}
+
+    bool isAlive() const {
+        return state && state->isAlive();
+    }
+
+    void setState(std::unique_ptr<CellState> newState) {
+        state = std::move(newState);
+    }
+};
+
+// 3. Grille : contient toutes les cellules + logique de voisinage
+
+
+class Grid {
+private:
+    int rows;
+    int cols;
+    std::vector<std::vector<Cell>> cells;
+
+public:
+    Grid(int r, int c)
+        : rows(r), cols(c), cells(r, std::vector<Cell>(c)) {}
+
+    int getRows() const { return rows; }
+    int getCols() const { return cols; }
+
+    const Cell& getCell(int r, int c) const {
+        return cells.at(r).at(c);
+    }
+
+    Cell& getCell(int r, int c) {
+        return cells.at(r).at(c);
+    }
+
+    void setAlive(int r, int c, bool alive) {
+        if (alive) {
+            cells[r][c].setState(std::make_unique<AliveState>());
+        } else {
+            cells[r][c].setState(std::make_unique<DeadState>());
+        }
+    }
+
+    int countAliveNeighbours(int r, int c) const {
+        static const int dr[8] = {-1,-1,-1, 0, 0, 1,1,1};
+        static const int dc[8] = {-1, 0, 1,-1, 1,-1,0,1};
+
+        int count = 0;
+        for (int i = 0; i < 8; ++i) {
+            int nr = r + dr[i];
+            int nc = c + dc[i];
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                if (getCell(nr, nc).isAlive()) {
+                    ++count;
+                }
+            }
+        }
+        return count;
+    }
+
+    bool operator==(const Grid& other) const {
+        if (rows != other.rows || cols != other.cols) return false;
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                if (getCell(r, c).isAlive() != other.getCell(r, c).isAlive())
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const Grid& other) const {
+        return !(*this == other);
+    }
+};
+
+
+// 4. Règles du jeu (hiérarchie indépendante)
+
+
+class IRule {
+public:
+    virtual ~IRule() = default;
+    virtual std::unique_ptr<CellState> computeNextState(const Cell& cell,
+                                                        int aliveNeighbours) const = 0;
+};
+
+class StandardRule : public IRule {
+public:
+    std::unique_ptr<CellState> computeNextState(const Cell& cell,
+                                                int aliveNeighbours) const override
+    {
+        bool currentlyAlive = cell.isAlive();
+        bool nextAlive = false;
+
+        if (currentlyAlive) {
+            // Une cellule vivante avec 2 ou 3 voisines reste vivante
+            if (aliveNeighbours == 2 || aliveNeighbours == 3)
+                nextAlive = true;
+            else
+                nextAlive = false;
+        } else {
+            // Une cellule morte avec exactement 3 voisines devient vivante
+            if (aliveNeighbours == 3)
+                nextAlive = true;
+        }
+
+        if (nextAlive)
+            return std::make_unique<AliveState>();
+        else
+            return std::make_unique<DeadState>();
+    }
+};
+
+
+// 5. Moteur du jeu : Game (logique métier uniquement)
+
+
+class Game {
+private:
+    Grid grid;
+    std::unique_ptr<IRule> rule;
+    int maxIterations;
+    int currentIteration;
+    bool stopWhenStable;
+    bool finished;
+
+public:
+    Game(Grid initialGrid,
+         std::unique_ptr<IRule> ruleImpl,
+         int maxIter,
+         bool stopStable = true)
+        : grid(std::move(initialGrid)),
+          rule(std::move(ruleImpl)),
+          maxIterations(maxIter),
+          currentIteration(0),
+          stopWhenStable(stopStable),
+          finished(false)
+    {}
+
+    const Grid& getGrid() const { return grid; }
+    int getIteration() const { return currentIteration; }
+    bool isFinished() const { return finished; }
+
+    void step() {
+        if (finished) return;
+
+        Grid nextGrid(grid.getRows(), grid.getCols());
+
+        for (int r = 0; r < grid.getRows(); ++r) {
+            for (int c = 0; c < grid.getCols(); ++c) {
+                const Cell& cell = grid.getCell(r, c);
+                int alive = grid.countAliveNeighbours(r, c);
+                auto nextState = rule->computeNextState(cell, alive);
+                nextGrid.getCell(r, c).setState(std::move(nextState));
+            }
+        }
+
+        if (stopWhenStable && nextGrid == grid) {
+            finished = true;
+            return;
+        }
+
+        grid = std::move(nextGrid);
+        ++currentIteration;
+
+        if (currentIteration >= maxIterations) {
+            finished = true;
+        }
+    }
+};
+
+// 6. Interfaces d'affichage (Vue) : Console + SFML
+
+
+class IRenderer {
+public:
+    virtual ~IRenderer() = default;
+    virtual void render(const Grid& grid, int iteration) = 0;
+};
+
+
+
+class ConsoleRenderer : public IRenderer {
+private:
+    std::string outputDirectory;
+
+public:
+    explicit ConsoleRenderer(const std::string& baseFileName) {
+        // Dossier de sortie : <nom_fichier>_out
+        outputDirectory = baseFileName + "_out";
+        std::filesystem::create_directories(outputDirectory);
+    }
+
+    void render(const Grid& grid, int iteration) override {
+        // Nom de fichier : iteration_<n>.txt
+        std::ostringstream oss;
+        oss << outputDirectory << "/iteration_" << iteration << ".txt";
+        std::string filePath = oss.str();
+
+        std::ofstream out(filePath);
+        if (!out) {
+            std::cerr << "Impossible d'écrire dans " << filePath << "\n";
+            return;
+        }
+
+        int rows = grid.getRows();
+        int cols = grid.getCols();
+        out << rows << " " << cols << "\n";
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                out << (grid.getCell(r, c).isAlive() ? 1 : 0);
+                if (c < cols - 1) out << " ";
+            }
+            out << "\n";
+        }
+    }
+};
+
+
+
+class GraphicsRendererSFML : public IRenderer {
+private:
+    sf::RenderWindow* window;
+    int cellSize;
+
+public:
+    GraphicsRendererSFML(sf::RenderWindow* win, int cellSize = 10)
+        : window(win), cellSize(cellSize) {}
+
+    void render(const Grid& grid, int /*iteration*/) override {
+        window->clear(sf::Color::Black);
+
+        int rows = grid.getRows();
+        int cols = grid.getCols();
+        sf::RectangleShape rect(sf::Vector2f(static_cast<float>(cellSize - 1),
+                                             static_cast<float>(cellSize - 1)));
+        rect.setFillColor(sf::Color::White);
+
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                if (grid.getCell(r, c).isAlive()) {
+                    rect.setPosition(static_cast<float>(c * cellSize),
+                                     static_cast<float>(r * cellSize));
+                    window->draw(rect);
+                }
+            }
+        }
+        window->display();
+    }
+};
+
+
+// 7. Lecture du fichier d'entrée : FileLoader
+
+class FileLoader {
+public:
+    Grid load(const std::string& filePath) const {
+        std::ifstream in(filePath);
+        if (!in) {
+            throw std::runtime_error("Impossible d'ouvrir le fichier : " + filePath);
+        }
+
+        int rows, cols;
+        in >> rows >> cols;
+        if (!in) {
+            throw std::runtime_error("Format de fichier invalide (dimensions manquantes).");
+        }
+
+        Grid grid(rows, cols);
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < cols; ++c) {
+                int val;
+                in >> val;
+                if (!in) {
+                    throw std::runtime_error("Format de fichier invalide (valeurs manquantes).");
+                }
+                grid.setAlive(r, c, (val == 1));
+            }
+        }
+        return grid;
+    }
+};
+
+
+// 8. Main - Gestion des deux modes : console et graphique
+
+
+void printUsage(const char* progName) {
+    std::cout << "Usage :\n"
+              << "  Mode console : " << progName << " --console <fichier> <nb_iterations>\n"
+              << "  Mode graphique : " << progName << " --sfml <fichier>\n";
+}
+
+int main(int argc, char* argv[]) {
+    if (argc < 3) {
+        printUsage(argv[0]);
+        return 1;
+    }
+
+    std::string mode = argv[1];
+    std::string filePath = argv[2];
+
+    try {
+        FileLoader loader;
+        Grid initialGrid = loader.load(filePath);
+        auto rule = std::make_unique<StandardRule>();
+
+        if (mode == "--console") {
+            if (argc < 4) {
+                std::cerr << "Nombre d'iterations manquant pour le mode console.\n";
+                printUsage(argv[0]);
+                return 1;
+            }
+
+            int maxIterations = std::stoi(argv[3]);
+            Game game(std::move(initialGrid), std::move(rule), maxIterations, true);
+
+            // Nom de base pour le répertoire de sortie (sans extension)
+            std::string baseName = std::filesystem::path(filePath).stem().string();
+            ConsoleRenderer renderer(baseName);
+
+            // On considère que l'iteration 0 est l'état initial
+            int iteration = 0;
+            renderer.render(game.getGrid(), iteration);
+
+            while (!game.isFinished()) {
+                game.step();
+                ++iteration;
+                if (!game.isFinished()) {
+                    renderer.render(game.getGrid(), iteration);
+                } else {
+                    // Si le jeu se stabilise ou atteint maxIterations,
+                    // on peut décider de sauver aussi cet état final.
+                    renderer.render(game.getGrid(), iteration);
+                }
+            }
+
+            std::cout << "Simulation console terminee. Fichiers generes dans le dossier : "
+                      << baseName << "_out\n";
+
+        } else if (mode == "--sfml") {
+            // Mode graphique : fenêtre SFML, mise à jour automatique
+
+            int rows = initialGrid.getRows();
+            int cols = initialGrid.getCols();
+            int cellSize = 10;
+
+            sf::RenderWindow window(
+                sf::VideoMode(static_cast<unsigned int>(cols * cellSize),
+                              static_cast<unsigned int>(rows * cellSize)),
+                "Game of Life - SFML");
+
+            Game game(std::move(initialGrid), std::move(rule), 100000, true);
+            GraphicsRendererSFML renderer(&window, cellSize);
+
+            sf::Clock clock;
+            sf::Time delay = sf::milliseconds(150); // temps entre deux iterations
+
+            while (window.isOpen()) {
+                sf::Event event;
+                while (window.pollEvent(event)) {
+                    if (event.type == sf::Event::Closed)
+                        window.close();
+                }
+
+                if (clock.getElapsedTime() >= delay && !game.isFinished()) {
+                    game.step();
+                    clock.restart();
+                }
+
+                renderer.render(game.getGrid(), game.getIteration());
+            }
+
+        } else {
+            std::cerr << "Mode inconnu : " << mode << "\n";
+            printUsage(argv[0]);
+            return 1;
+        }
+    }
+    catch (const std::exception& ex) {
+        std::cerr << "Erreur : " << ex.what() << "\n";
+        return 1;
+    }
+
+    return 0;
+}
