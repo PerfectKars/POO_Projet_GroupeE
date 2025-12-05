@@ -1,5 +1,4 @@
-#ifndef REGLE_STANDARD_H
-#define REGLE_STANDARD_H
+#pragma once
 
 #include "Regle.h"
 #include "Vivante.h"
@@ -9,5 +8,3 @@ class RegleStandard : public Regle {
 public:
     EtatCellule* nouvelEtat(const Cellule& cellule, int voisinsVivants) const override;
 };
-
-#endif
