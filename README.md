@@ -36,21 +36,13 @@ Exécutez le programme :
 
     ./main
 
-3. Tests Unitaires
-
-Le projet inclut des tests unitaires pour valider la logique d'évolution de l'automate, en particulier la classe RegleStandard. Les tests sont définis dans TestsUnitaires.cpp.
-
-    Les tests sont exécutés automatiquement au lancement du programme.
-
-    Ils vérifient les règles de Survie, Naissance et Mort (sous-population/surpopulation).
-
-4. Nettoyage
+3. Nettoyage
 
 Pour supprimer les fichiers générés (main et fichiers de debug) :
 
 make clean
 
-5. Prérequis
+4. Prérequis
 Installation de SFML
 
 Pour compiler et exécuter ce projet, vous devez avoir installé :
@@ -61,11 +53,4 @@ Pour compiler et exécuter ce projet, vous devez avoir installé :
 
 Installation de SFML (sur systèmes Debian/Ubuntu) :
 
-sudo apt-get install libsfml-dev
-
-6. Auteur
-
-Votre nom - [Lien vers votre profil GitHub ou autre]
-
-
-Ce README contient toutes les instructions nécessaires pour cloner, compiler, et exécuter le projet, 
+sudo apt-get install libsfml-d
