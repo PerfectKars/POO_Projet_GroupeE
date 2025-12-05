@@ -42,7 +42,32 @@ Pour supprimer les fichiers générés (main et fichiers de debug) :
 
 make clean
 
-4. Prérequis
+4. Structure du Projet
+
+Voici la structure des dossiers et fichiers du projet :
+
+.
+├── src/                 # Contient les fichiers sources du projet
+│   ├── main.cpp         # Point d'entrée du programme
+│   ├── Jeu.cpp          # Logique du jeu (modèle)
+│   ├── Grille.cpp       # Gestion de la grille du Jeu de la Vie
+│   ├── Cellule.cpp      # Classe Cellule
+│   ├── RegleStandard.cpp# Règles d'évolution (Conway)
+│   ├── RenduGraphiqueSFML.cpp  # Affichage graphique avec SFML
+│   └── RenduConsole.cpp # Affichage en console
+├── include/             # Contient les fichiers d'en-tête
+│   ├── Jeu.h            # Définition de la classe Jeu
+│   ├── Grille.h         # Définition de la classe Grille
+│   ├── Cellule.h        # Définition de la classe Cellule
+│   ├── RegleStandard.h  # Définition des règles d'évolution
+│   ├── IRendu.h         # Interface pour l'affichage
+│   └── RenduGraphiqueSFML.h # Définition de l'interface graphique SFML
+├── build/               # Répertoire de compilation généré par CMake
+├── CMakeLists.txt       # Fichier de configuration pour CMake
+└── Makefile             # Makefile pour simplifier la compilation
+
+
+5. Prérequis
 Installation de SFML
 
 Pour compiler et exécuter ce projet, vous devez avoir installé :
