@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Lancer Jeu de la Vie",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/jeu",
+            "args": ["matrice1.txt"],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "MIMode": "gdb"
+        }
+    ]
+}
