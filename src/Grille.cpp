@@ -48,7 +48,7 @@ bool Grille::estEgal(const Grille& autre) const {
 
 
 void Grille::sauvegarderEtat(const std::string& nomFichier) const {
-    std::ofstream outFile(nomFichier);  // Ouvre un fichier en mode écriture
+    std::ofstream outFile(nomFichier);  
 
     if (!outFile) {
         std::cerr << "Impossible d'ouvrir le fichier " << nomFichier << " pour l'écriture !" << std::endl;
@@ -64,7 +64,7 @@ void Grille::sauvegarderEtat(const std::string& nomFichier) const {
         outFile << std::endl;
     }
 
-    outFile.close();  // Ferme le fichier après l'écriture
+    outFile.close();  
     std::cout << "État final de la grille sauvegardé dans " << nomFichier << std::endl;
 }
 
@@ -78,7 +78,6 @@ int Grille::compterVoisinsVivants(int i, int j) const
         for (int dy = -1; dy <= 1; dy++) {
             if (dx == 0 && dy == 0) continue;
 
-            // Calcul des nouveaux indices avec un wraparound (torique)
             int nx = (i + dx + lignes) % lignes;
             int ny = (j + dy + colonnes) % colonnes;
 
