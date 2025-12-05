@@ -1,5 +1,4 @@
-#ifndef CELLULE_H
-#define CELLULE_H
+#pragma once
 
 #include "EtatCellule.h"
 
@@ -19,5 +18,3 @@ public:
     bool estVivante() const;
     void changerEtat(EtatCellule* nouvelEtat);
 };
-
-#endif
