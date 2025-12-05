@@ -1,5 +1,4 @@
-#ifndef ETAT_CELLULE_H
-#define ETAT_CELLULE_H
+#pragma once
 
 class EtatCellule {
 public:
@@ -7,5 +6,3 @@ public:
     virtual EtatCellule* clone() const = 0;
     virtual ~EtatCellule() = default;
 };
-
-#endif
