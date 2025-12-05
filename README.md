@@ -8,7 +8,7 @@ Le projet est organisé selon un modèle orienté objet avec les classes suivant
 
 * **Logique de l'Automate** : Classes `Cellule`, `Grille`, `IRegle`, `RegleStandard`.
 * **Affichage** : Interface `IRendu` avec ses implémentations `RenduGraphiqueSFML` et `RenduConsole`.
-* **Contrôle** : Classes `Jeu` (modèle) et `ControleurGraphique` (gère la boucle principale et les événements).
+* **Contrôle** : Classes `Jeu` (modèle)
 
 ## 2. Compilation et Exécution
 
@@ -45,27 +45,17 @@ make clean
 4. Structure du Projet
 
 Voici la structure des dossiers et fichiers du projet :
+     - src/ : Contient le code source du projet, incluant la logique du jeu, les règles, et les affichages.
 
-.
-├── src/                 # Contient les fichiers sources du projet
-│   ├── main.cpp         # Point d'entrée du programme
-│   ├── Jeu.cpp          # Logique du jeu (modèle)
-│   ├── Grille.cpp       # Gestion de la grille du Jeu de la Vie
-│   ├── Cellule.cpp      # Classe Cellule
-│   ├── RegleStandard.cpp# Règles d'évolution (Conway)
-│   ├── RenduGraphiqueSFML.cpp  # Affichage graphique avec SFML
-│   └── RenduConsole.cpp # Affichage en console
-├── include/             # Contient les fichiers d'en-tête
-│   ├── Jeu.h            # Définition de la classe Jeu
-│   ├── Grille.h         # Définition de la classe Grille
-│   ├── Cellule.h        # Définition de la classe Cellule
-│   ├── RegleStandard.h  # Définition des règles d'évolution
-│   ├── IRendu.h         # Interface pour l'affichage
-│   └── RenduGraphiqueSFML.h # Définition de l'interface graphique SFML
-├── build/               # Répertoire de compilation généré par CMake
-├── CMakeLists.txt       # Fichier de configuration pour CMake
-└── Makefile             # Makefile pour simplifier la compilation
+     - include/ : Contient les fichiers d'en-tête qui définissent les interfaces et les structures de données.
 
+     - build/ : Ce dossier est généré automatiquement lors de la compilation et contient les fichiers de build.
+
+     - .vscode/ : Répertoire contenant la configuration de VSCode pour l'éditeur, incluant les tâches de compilation, le débogage et les paramètres de l'environnement de développement.
+
+     - CMakeLists.txt : Fichier de configuration pour CMake, utilisé pour générer les fichiers de build.
+
+     - Makefile : Pour simplifier la compilation (utilisé en parallèle avec CMake).
 
 5. Prérequis
 Installation de SFML
