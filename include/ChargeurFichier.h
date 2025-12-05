@@ -1,5 +1,4 @@
-#ifndef CHARGEUR_FICHIER_H
-#define CHARGEUR_FICHIER_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -11,5 +10,3 @@ public:
                         int& colonnes,
                         std::vector<std::vector<int>>& matrice);
 };
-
-#endif
