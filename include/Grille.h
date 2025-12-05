@@ -1,5 +1,4 @@
-#ifndef GRILLE_H
-#define GRILLE_H
+#pragma once
 
 #include <vector>
 #include "Cellule.h"
@@ -25,5 +24,3 @@ public:
 
     const std::vector<std::vector<Cellule>>& getCellules() const { return cellules; }
 };
-
-#endif
