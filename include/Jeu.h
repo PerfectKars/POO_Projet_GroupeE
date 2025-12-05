@@ -1,5 +1,4 @@
-#ifndef JEU_H
-#define JEU_H
+#pragma once
 
 #include "Grille.h"
 #include "Regle.h"
@@ -17,5 +16,3 @@ public:
     Jeu(Grille* grille, Regle* regle, int intervalle);
     void lancer();
 };
-
-#endif
