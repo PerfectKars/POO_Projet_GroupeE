@@ -1,5 +1,4 @@
-#ifndef RENDU_GRAPHIQUE_SFML_H
-#define RENDU_GRAPHIQUE_SFML_H
+#pragma once
 
 #include <SFML/Graphics.hpp>
 #include "Grille.h"
@@ -16,5 +15,3 @@ public:
     void gererEvenements();
     bool estOuvert() const;
 };
-
-#endif
