@@ -1,5 +1,4 @@
-#ifndef VIVANTE_H
-#define VIVANTE_H
+#pragma once
 
 #include "EtatCellule.h"
 
@@ -8,5 +7,3 @@ public:
     bool estVivante() const override { return true; }
     EtatCellule* clone() const override { return new Vivante(*this); }
 };
-
-#endif
